@@ -1,4 +1,4 @@
-# Fluid Diodes using Topology Optimization with TOBS approach
+# Topology Optimization with adaptive mesh and TOBS approach
 
 This repository uses the more open source libraries possible to use adaptive mesh using the TOBS method.
 
