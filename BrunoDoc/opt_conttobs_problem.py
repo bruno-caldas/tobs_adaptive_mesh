@@ -164,23 +164,18 @@ class OP(AProb.AP):
 
         ds_vars.rename("ControlFiltered", "ControlFiltered")
 
-        random_cells = numpy.random.randint(10, size=(1600))
+        random_cells = numpy.random.randint(1600, size=(10))
         # random_cells = [*range(1600)]
         self.file_analise = open(self.workdir + "/analise.txt", "a+")
         self.file_analise.write(' \t Point Number\tFinite Diference\tSensibility\tError\n')
 
         ds_vars.vector()[:] = 1
         funcional1, w = self.Funcional(ds_vars, save_results=False)
-        w3 = w2.copy(deepcopy=True)
         lam1 = self.get_adjoint_solution(ds_vars, w)
-        lam2 = self.get_adjoint_solution2(ds_vars, w2)
-        lam3 = self.get_adjoint_solution3(ds_vars, w3)
         fval1 = assemble(funcional1)
-        fval2 = assemble(funcional2)
-        fval3 = assemble(Fstar)
-        fval_0 = fval1/fval2 + fval3
+        fval_0 = fval1
 
-        L = lam1/fval2 - 1 *fval1/fval2**2 * lam2 + lam3
+        L = lam1
 
         '''a = TrialFunction(ds_vars.function_space())
         b = TestFunction(ds_vars.function_space())
@@ -199,20 +194,21 @@ class OP(AProb.AP):
             ds_vars.vector()[rcell] = 1 - delta_ds_vars
             funcional1, w = self.Funcional(ds_vars, save_results=False)
             fval1 = assemble(funcional1)
-            fval2 = assemble(funcional2)
-            fval3 = assemble(Fstar)
-            fval_1 = fval1/fval2 + fval3
+            fval_1 = fval1
 
             finite_diference = (fval_0 - fval_1) / delta_ds_vars
             error = (finite_diference-L[rcell])/L[rcell]
             self.file_analise.write('Point ID:\t' +str(rcell) + '\t' + \
-                    str(finite_diference) + '\t' + str(L[rcell]) + '\t' + str(error) + '\n')
+                    str(finite_diference) + '\t' + str(L[rcell]) + '\t' + str(error*100) + ' %\n')
             ds_vars.vector()[:] = 1
             error_cells.append(error)
             sens.vector()[rcell] = finite_diference
             file_teste << sens
 
         self.file_analise.close()
+        print("Lendo o arquivo")
+        with open(self.workdir + "/analise.txt", "r") as f:
+            print(f.read())
 
         import pdb;pdb.set_trace()
         return error_cells

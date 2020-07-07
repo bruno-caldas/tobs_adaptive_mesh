@@ -61,7 +61,7 @@ class FP(BProp.PP):
         (u, p) = split(self.w)
         (v, q) = TestFunctions(self.W)
         epsilon = sym(grad(u))
-        '''
+
         # Navier-Stokes Nao linear
         F = (self.alpha(rho) * inner(u, v) * dx \
             + self.mu*inner(grad(u), grad(v)) * dx \
@@ -80,7 +80,8 @@ class FP(BProp.PP):
         prm['newton_solver']['relaxation_parameter'] = 1.0
         print("Resolvendo valor de mu {}".format(float(self.mu)))
         print("Resolvendo valor de kmax {}".format(float(self.alphabar)))
-        solver.solve()'''
+        solver.solve()
+        '''
 
         (u, p) = TrialFunctions(self.W)
         F = self.alpha(rho) * inner(u, v) * dx \
@@ -90,7 +91,7 @@ class FP(BProp.PP):
         problem = LinearVariationalProblem(lhs(F), rhs(F), self.w, BondConditions)
         solver = LinearVariationalSolver(problem)
         prm=solver.parameters
-        solver.solve()
+        solver.solve()'''
 
         (u, p) = self.w.split()
         u.rename("velocidade", "conforme_tempo")
