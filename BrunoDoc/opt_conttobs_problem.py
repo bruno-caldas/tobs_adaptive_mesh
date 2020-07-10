@@ -7,6 +7,7 @@ import BrunoDoc.parameters as Par
 import numpy
 import BrunoDoc.tobs as tobs
 import math
+from BrunoDoc.filter_class import filter_obj
 
 from BrunoDoc.read_param_file import *
 
@@ -119,6 +120,11 @@ class OP(AProb.AP):
 
         mesh = ds_vars.function_space().mesh()
 
+        # self.filter_f = filter_obj(mesh, rmin=1/6/2, beta=1)
+        # ds_vars = self.filter_f.Rho_elem(ds_vars)
+        # ds_vars.rename("filtrado", "filtrado")
+        # self.file_filtrado << ds_vars
+
         funcional1, w = self.Funcional(ds_vars) #, self.state, self.state2)
 
         lam1 = self.get_adjoint_solution(ds_vars, w)
@@ -135,9 +141,9 @@ class OP(AProb.AP):
 
         if self.filter_f is not None: sensibility = self.filter_f.Sens_elem(sensibility)
 
-        for cell in cells(mesh):
+        '''for cell in cells(mesh):
             if (cell.midpoint().x() > delta or cell.midpoint().x() < 0):
-                sensibility.vector()[cell.index()] = L.min()
+                sensibility.vector()[cell.index()] = L.min()'''
 
         sensibility.rename("Sensitivity", "Sensitivity")
         self.file_sen << sensibility
@@ -218,14 +224,14 @@ class OP(AProb.AP):
         self.cst_L.append(lwr)
         self.cst_num += 1
 
-    def add_volf_constraint2(self, upp, lwr):
+    '''def add_volf_constraint2(self, upp, lwr):
         self.cst_U.append(upp)
         self.cst_L.append(lwr)
 
         self.cst_num += 1
 
         self.cst_U = numpy.array(self.cst_U) #Eu q pus isto
-        self.cst_L = numpy.array(self.cst_L) #Eu q pus isto
+        self.cst_L = numpy.array(self.cst_L) #Eu q pus isto'''
 
     def volfrac_fun(self, xi):
 
@@ -328,20 +334,22 @@ class OP(AProb.AP):
         #Parameters
 
         def cb_post(rho_opt, rho_notfiltered, mesh_adapt, domain, iteration):
-            self.file_mesh_adapted << mesh_adapt
-            self.mesh_adapt = mesh_adapt
+            # self.file_mesh_adapted << mesh_adapt
+            # self.mesh_adapt = mesh_adapt
             self.rho = rho_opt
-            self.file_domain << domain
+            # self.file_domain << domain
             rho_opt.rename("controlNotFiltered", "controlNotFiltered")
             self.file_out << rho_opt
             self.iteration = iteration
             # self.rotating_parts = domain
-            if iteration == 10:
-                self.alphabar.assign(1.e3)
             if iteration == 20:
-                self.alphabar.assign(1.e4)
-            if iteration == 30:
-                self.alphabar.assign(1.e5)
+                self.alphabar.assign(2.5e3)
+            if iteration == 40:
+                self.alphabar.assign(2.5e4)
+            if iteration == 60:
+                self.alphabar.assign(2.5e5)
+            '''if iteration == 80:
+                self.alphabar.assign(2.5e6)'''
 
         self.file_mesh_adapted << self.rho.function_space().mesh()
         self.rho.full_geo = self.full_geo

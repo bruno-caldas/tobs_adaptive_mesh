@@ -40,7 +40,7 @@ class AP(FProb.FP):
         # Absoluto COM KVV
         funcional1 = 1*(  inner(self.alpha(rho) * u, u) \
             +  0.5 * AP.mu *(
-                inner(grad(u) + grad(u).T, grad(u) + grad(u).T)
+                inner(sym(grad(u)), sym(grad(u)))
                 ) \
             # - inner(self.alpha(rho), (self.r_n-self.radius)**4) \
             )
@@ -65,8 +65,8 @@ class AP(FProb.FP):
         F_ad = (
                 inner(div(u_ad_t), q_ad) \
                 + inner(grad(u_ad_t), grad(v_ad)) \
-                - inner(grad(u_ad_t)*u, v_ad) \
-                + inner(grad(u).T* u_ad_t, v_ad) \
+                # - inner(grad(u_ad_t)*u, v_ad) \
+                # + inner(grad(u).T* u_ad_t, v_ad) \
                 + self.alpha(rho) * inner(u_ad_t, v_ad) \
                 + inner(grad(p_ad_t), v_ad) \
                 )*dx
@@ -76,13 +76,9 @@ class AP(FProb.FP):
         dJdu = 1 *(
                 2*self.alpha(rho) * inner(u, v_ad)* dx
                 + 0.5*(
-                    inner(grad(u), grad(v_ad)) * dx
-                    + inner(grad(u).T, grad(v_ad)) * dx
-                    + inner(grad(u), grad(v_ad).T) * dx
-                    + inner(grad(u).T, grad(v_ad).T) * dx
+                    inner(sym(grad(u)), sym(grad(v_ad)))*dx
                     )
                 )
-                # inner(grad(u), grad(v_ad)) * dx + 2*self.alpha(rho) * inner(u, v_ad)* dx
         solve( F_ad == dJdu , adj, bc_hom)
 
         # rho = self.density_filter(rho)
@@ -93,6 +89,7 @@ class AP(FProb.FP):
         dmo = TestFunction( rho.function_space() )
 
         dJdm = (-1.*self.alphadash(rho)*inner(u,adj_u) + self.alphadash(rho)*inner(u,u))*dmo*dx
+        # dJdm = (-1.*self.alphadash(rho)*inner(u,adj_u) )*dmo*dx
         adjfinal_1_resp = assemble(dJdm)
 
         return adjfinal_1_resp

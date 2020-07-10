@@ -59,13 +59,13 @@ class TobsObj():
         # self.jd = (self.jd + self.jd_previous)/2 #stabilization #FIXME: tirei a estabilizacao
 
         # self.jac = np.concatenate([self.jac[0].reshape((-1,1)), self.jac[1].reshape((-1,1)), self.jac[2].reshape((-1,1))], axis=1)
-        self.jac = np.concatenate([
-            # self.jac[0].reshape((-1,1)),
+        '''self.jac = np.concatenate([
             self.jac[0].reshape((-1,1)),
-            self.jac[1].reshape((-1,1)),
+            self.jac[0].reshape((-1,1)),
+            # self.jac[1].reshape((-1,1)),
             # self.jac[3].reshape((-1,1))
-            ], axis=1)
-        # self.jac = np.array(self.jac).reshape((-1,1))
+            ], axis=1)'''
+        self.jac = np.array(self.jac).reshape((-1,1))
 
     @staticmethod
     def cplex_optimize(prob, nvar, my_obj, my_constcoef, my_rlimits, my_ll, my_ul, minimize):
@@ -73,17 +73,16 @@ class TobsObj():
 
         my_ctype = "I"*nvar
         my_colnames = ["x"+str(item) for item in range(nvar)]
-        my_sense = ["L", "G", "L"]
+        # my_sense = ["L", "G", "L"]
+        my_sense = ["L", "L"]
 
-        my_rownames = ["r1", "r2", "r3"]
-        # my_rownames = ["r1", "r3", "r4", "r5"]
-        # my_rlimits.pop(1)
+        # my_rownames = ["r1", "r2", "r3"]
+        my_rownames = ["r1", "r2"]
 
         prob.variables.add(obj=my_obj, lb=my_ll, ub=my_ul, types=my_ctype,
                                names=my_colnames)
 
         rows = [
-                cplex.SparsePair(ind=["x"+str(item) for item in range(nvar)], val = my_constcoef[0]),
                 cplex.SparsePair(ind=["x"+str(item) for item in range(nvar)], val = my_constcoef[0]),
                 cplex.SparsePair(ind=["x"+str(item) for item in range(nvar)], val = my_constcoef[1])
                 ]
@@ -95,7 +94,8 @@ class TobsObj():
         print("call_back function should be defined")
 
     def solve(self, rho, minimize=True, filter_fun=None, call_back=post_evaluation):
-        flip_limits = 0.1
+        flip_limits = 0.05
+        flip_limits = 0.3
         self.j_previous = None
         while True:
             self.control = np.copy(rho.vector())
@@ -104,10 +104,10 @@ class TobsObj():
             self.cs = self.cst_fun(self.control)
             self.jac = self.jac_fun(self.control)
             self.reshape_to_matlab()
-            self.volume_constraint = np.array([self.acst_L[1], self.acst_U[1]])
-            # ep = 0.00001 # 12
-            ep = 0.4 # 12
-            self.epsilons = np.array([ep, ep]) #O benchmarking estava em 0.2
+            self.volume_constraint = np.array([self.acst_U[0]])
+            ep = 0.2 # 0.02 da o X no delta=1
+            # if self.iteration > 10: ep = 0.001 # 12
+            self.epsilons = np.array([ep]) #O benchmarking estava em 0.2
             ans = octave.tobs_from_matlab(
                     self.nvar,
                     self.x_L,
@@ -144,12 +144,12 @@ class TobsObj():
             design_variables = my_prob.solution.get_values()
 
             rho.vector().add_local(np.array(design_variables))
-            # rho.vector().set_local(np.array(design_variables)) # achava q era esse
 
             rho_notfiltered = rho.copy(deepcopy=True)
 
             # call_back(rho, rho_notfiltered, mesh_adapted, domain, self.iteration)
-            mesh_adapt, domain = sm.generate_polygon_refined(rho)
+            # mesh_adapt, domain = sm.generate_polygon_refined(rho)
+            mesh_adapt = None; domain = None
             call_back(rho, rho_notfiltered, mesh_adapt, domain, self.iteration)
 
             vetor_rho = np.array([0 if item<0.5 else 1 for item in np.array(rho.vector())])

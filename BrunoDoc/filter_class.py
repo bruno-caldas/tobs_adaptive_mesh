@@ -86,8 +86,8 @@ class filter_obj(object):
         rho_e[np.where(rho_e > 1)[0]] = 1
         rho_e[np.where(rho_e < 0)[0]] = 0
 
-        # frho.vector()[:] = 1 - rho_e
         frho.vector()[:] = rho_e
+        # frho.vector()[:] = 1 - rho_e
         return frho
         #######-----------------------------------------------------------------#######
         ###############################################################################
@@ -117,7 +117,7 @@ class filter_obj(object):
                 sens[ind] = vetore[ind]
 
         fsens.vector()[:] = sens
-        # fsens.vector()[:] = 1 - sens
+        # fsens.vector()[:] = - sens
         # plot(fsens, title='Element Sensitivity',key="Sensitivity")
         return fsens
     #######-----------------------------------------------------------------#######

@@ -30,6 +30,7 @@ class InflowOutflow(UserExpression):
         Reynolds = 1
         v_average = Reynolds / (2*gap)
         self.gbar = (3/2) * v_average
+        self.gbar = 1
         self.length = gap
 
     def eval_cell(self, values, x, ufc_cell):
@@ -54,6 +55,9 @@ class Distribution(UserExpression):
 
     def eval_cell(self, values, x, ufc_cell):
         values[0] = 1.0
+        # if x[1] < (1/4-1/12) or x[1] > (3/4+1/12):
+        # if x[0] > .3:
+        #     values[0] = 0.0
 
 class PP:
     """
@@ -61,10 +65,12 @@ class PP:
     """
     #rho_eq = 2.696373e-6 #Exemplo do Breda
     rho_eq = 1.
+    mu = Constant(1.0e5)
     mu = Constant(1.0)
     # seq_mu = [10, 5, 3, 2, 1.5, 1.3, 1.2]#, 1.15, 1.1, float(mu)]
     seq_mu = [float(mu)]
-    alphaunderbar = 0.
+    # alphaunderbar = 0.
+    alphaunderbar = 2.5 * mu *1e-4    # kg/ (m**3 *s)
     alphabar = 2.5 * mu * 1e6 * 1e-6    # kg/ (m**3 *s)
     alphaJbar = 2.5 * mu * 1e6 * 1e-6    # kg/ (m**3 *s)
     q = Constant(1.0) # q value that controls difficulty/discrete-valuedness of solution
