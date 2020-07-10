@@ -95,7 +95,7 @@ class TobsObj():
 
     def solve(self, rho, minimize=True, filter_fun=None, call_back=post_evaluation):
         flip_limits = 0.05
-        flip_limits = 0.3
+        flip_limits = 0.2
         self.j_previous = None
         while True:
             self.control = np.copy(rho.vector())
@@ -147,9 +147,8 @@ class TobsObj():
 
             rho_notfiltered = rho.copy(deepcopy=True)
 
-            # call_back(rho, rho_notfiltered, mesh_adapted, domain, self.iteration)
-            # mesh_adapt, domain = sm.generate_polygon_refined(rho)
             mesh_adapt = None; domain = None
+            # mesh_adapt, domain = sm.generate_polygon_refined(rho)
             call_back(rho, rho_notfiltered, mesh_adapt, domain, self.iteration)
 
             vetor_rho = np.array([0 if item<0.5 else 1 for item in np.array(rho.vector())])

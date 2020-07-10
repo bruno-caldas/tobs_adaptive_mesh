@@ -334,10 +334,11 @@ class OP(AProb.AP):
         #Parameters
 
         def cb_post(rho_opt, rho_notfiltered, mesh_adapt, domain, iteration):
-            # self.file_mesh_adapted << mesh_adapt
-            # self.mesh_adapt = mesh_adapt
+            if mesh_adapt is not None:
+                self.mesh_adapt = mesh_adapt
+                self.file_mesh_adapted << mesh_adapt
+                self.file_domain << domain
             self.rho = rho_opt
-            # self.file_domain << domain
             rho_opt.rename("controlNotFiltered", "controlNotFiltered")
             self.file_out << rho_opt
             self.iteration = iteration

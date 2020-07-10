@@ -65,7 +65,6 @@ class PP:
     """
     #rho_eq = 2.696373e-6 #Exemplo do Breda
     rho_eq = 1.
-    mu = Constant(1.0e5)
     mu = Constant(1.0)
     # seq_mu = [10, 5, 3, 2, 1.5, 1.3, 1.2]#, 1.15, 1.1, float(mu)]
     seq_mu = [float(mu)]
@@ -139,8 +138,8 @@ class PP:
                 raise Exception('Defina uma configuracao')
 
             if linha[9].upper()[:2] == 'DA': mesh = Mesh(generate_mesh(vertices, self.N))
-            mesh = RectangleMesh.create([Point(0.0,0.0),Point(delta,1)], [int(self.N*delta), self.N], CellType.Type.quadrilateral)
-            # mesh = Mesh(RectangleMesh(Point(0.0, 0.0), Point(delta, 1.0), int(self.N*delta), int(self.N), diagonal="right"))
+            # mesh = RectangleMesh.create([Point(0.0,0.0),Point(delta,1)], [int(self.N*delta), self.N], CellType.Type.quadrilateral)
+            mesh = Mesh(RectangleMesh(Point(0.0, 0.0), Point(delta, 1.0), int(self.N*delta), int(self.N), diagonal="crossed"))
             (self.z_n, self.r_n) = SpatialCoordinate(mesh)
             self.nr = 1
             self.nz = 0
